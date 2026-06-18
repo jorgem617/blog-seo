@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+const posts = await Astro.glob('../../content/blog/*.md');
+const sorted = posts.sort((a, b) => new Date(b.frontmatter.date) - new Date(a.frontmatter.date));
+---
+<BaseLayout title="Blog" description="Todos los artículos">
+  <h1 style="margin-bottom:2rem">Artículos</h1>
+  {sorted.map(post => (
+    <article style="margin-bottom:2rem; padding-bottom:2rem; border-bottom:1px solid #eee">
+      <h2><a href={`/blog/${post.frontmatter.slug || post.file.split('/').pop().replace('.md','')}`} style="color:#1a1a2e; text-decoration:none">{post.frontmatter.title}</a></h2>
+      <p style="color:#888; font-size:0.9rem; margin:0.3rem 0">{new Date(post.frontmatter.date).toLocaleDateString('es-CO', {year:'numeric',month:'long',day:'numeric'})}</p>
+      <p style="margin-top:0.5rem">{post.frontmatter.description}</p>
+    </article>
+  ))}
+</BaseLayout>
