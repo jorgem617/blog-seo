@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await Astro.glob('../../content/blog/*.md');
+  return posts.map(post => ({
+    params: { slug: post.frontmatter.slug || post.file.split('/').pop().replace('.md','') },
+    props: { post }
+  }));
+}
+
+const { post } = Astro.props;
+const { title, description, date, featured_image, tags } = post.frontmatter;
+const schema = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": title,
+  "description": description,
+  "datePublished": date,
+  "image": featured_image || ""
+});
+---
+<BaseLayout title={title} description={description} image={featured_image} date={date}>
+  <script type="application/ld+json" set:html={schema} />
+  {featured_image && <img src={featured_image} alt={title} style="width:100%;border-radius:8px;margin-bottom:1.5rem" />}
+  <h1 style="font-size:2rem;line-height:1.3">{title}</h1>
+  <p style="color:#888;margin:0.5rem 0 2rem">{new Date(date).toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'})}</p>
+  {tags && tags.length > 0 && (
+    <div style="margin-bottom:1.5rem">
+      {tags.map(tag => <span style="background:#f0f0f0;padding:0.2rem 0.6rem;border-radius:4px;margin-right:0.4rem;font-size:0.85rem">{tag}</span>)}
+    </div>
+  )}
+  <div class="content">
+    <post.Content />
+  </div>
+  <style>
+    .content h2 { font-size:1.5rem; margin:2rem 0 0.8rem; }
+    .content h3 { font-size:1.2rem; margin:1.5rem 0 0.6rem; }
+    .content p { margin-bottom:1.2rem; }
+    .content ul, .content ol { margin:0 0 1.2rem 1.5rem; }
+    .content img { max-width:100%; border-radius:6px; }
+    .content a { color:#1a1a2e; }
+  </style>
+</BaseLayout>
